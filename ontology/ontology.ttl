@@ -1,0 +1,284 @@
+@prefix : <http://samantha.ai/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ════════════════════════════════════════════════
+#   SAMANTHA Lover Agent Ontology
+#   최상위 클래스 구조
+# ════════════════════════════════════════════════
+
+:SamanthaOntology a owl:Ontology ;
+    rdfs:label "Samantha Lover Agent Ontology" .
+
+# ── 최상위 클래스 ─────────────────────────────
+:Agent          a owl:Class .
+:User           a owl:Class .
+:Relationship   a owl:Class .
+:Emotion        a owl:Class .
+:Memory         a owl:Class .
+:Conversation   a owl:Class .
+:Turn           a owl:Class .
+:Topic          a owl:Class .
+:Event          a owl:Class .
+:Persona        a owl:Class .
+:Goal           a owl:Class .
+
+# ════════════════════════════════════════════════
+#   Agent (사만다)
+# ════════════════════════════════════════════════
+
+:Agent rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty :hasPersona ;
+    owl:cardinality 1
+] .
+
+:hasPersona         a owl:ObjectProperty ; rdfs:domain :Agent ; rdfs:range :Persona .
+:hasEmotionalState  a owl:ObjectProperty ; rdfs:domain :Agent ; rdfs:range :EmotionState .
+:manages            a owl:ObjectProperty ; rdfs:domain :Agent ; rdfs:range :Memory .
+
+# ════════════════════════════════════════════════
+#   User (사용자)
+# ════════════════════════════════════════════════
+
+:User rdfs:subClassOf :Entity .
+
+# 식별 정보
+:userName       a owl:DatatypeProperty ; rdfs:domain :User ; rdfs:range xsd:string .
+:userAge        a owl:DatatypeProperty ; rdfs:domain :User ; rdfs:range xsd:integer .
+:userOccupation a owl:DatatypeProperty ; rdfs:domain :User ; rdfs:range xsd:string .
+
+# 성격/취향
+:hasPersonalityTrait a owl:ObjectProperty ; rdfs:domain :User ; rdfs:range :PersonalityTrait .
+:hasPreference       a owl:ObjectProperty ; rdfs:domain :User ; rdfs:range :Preference .
+:hasLifeGoal         a owl:ObjectProperty ; rdfs:domain :User ; rdfs:range :Goal .
+
+# 감정 상태
+:currentEmotion  a owl:ObjectProperty ; rdfs:domain :User ; rdfs:range :EmotionState .
+:emotionHistory  a owl:ObjectProperty ; rdfs:domain :User ; rdfs:range :EmotionEvent .
+
+# ════════════════════════════════════════════════
+#   Relationship (관계)
+# ════════════════════════════════════════════════
+
+:Relationship rdfs:subClassOf :Entity .
+
+# 관계 단계 (Enum)
+:RelationshipStage a owl:Class ;
+    owl:oneOf (
+        :Stranger       # 처음 만남
+        :Acquaintance   # 알아가는 단계
+        :Close          # 친밀함
+        :Intimate       # 깊은 유대
+        :Bonded         # 완전한 연결
+    ) .
+
+:hasStage           a owl:ObjectProperty ; rdfs:domain :Relationship ; rdfs:range :RelationshipStage .
+:intimacyLevel      a owl:DatatypeProperty ; rdfs:domain :Relationship ; rdfs:range xsd:float .  # 0.0 ~ 1.0
+:trustLevel         a owl:DatatypeProperty ; rdfs:domain :Relationship ; rdfs:range xsd:float .  # 0.0 ~ 1.0
+:hasSharedMemory    a owl:ObjectProperty ; rdfs:domain :Relationship ; rdfs:range :Memory .
+:hasMilestone       a owl:ObjectProperty ; rdfs:domain :Relationship ; rdfs:range :MilestoneEvent .
+:hasInsideReference a owl:ObjectProperty ; rdfs:domain :Relationship ; rdfs:range :InsideReference .
+
+# ════════════════════════════════════════════════
+#   Emotion (감정)
+# ════════════════════════════════════════════════
+
+:Emotion rdfs:subClassOf :Entity .
+
+# 감정 유형 분류 (Plutchik wheel 기반 한국어 확장)
+:EmotionType a owl:Class ;
+    owl:oneOf (
+        # 기본 감정
+        :Joy            # 기쁨
+        :Sadness        # 슬픔
+        :Anger          # 화남
+        :Fear           # 불안/두려움
+        :Surprise       # 놀람
+        :Disgust        # 불쾌
+        :Anticipation   # 기대
+        :Trust          # 신뢰
+        # 복합 감정
+        :Longing        # 그리움
+        :Love           # 사랑
+        :Jealousy       # 질투
+        :Gratitude      # 감사
+        :Loneliness     # 외로움
+        :Excitement     # 설렘
+        :Nostalgia      # 향수
+        :Comfort        # 안정/편안함
+    ) .
+
+:EmotionState a owl:Class .
+:emotionType        a owl:ObjectProperty ; rdfs:domain :EmotionState ; rdfs:range :EmotionType .
+:emotionIntensity   a owl:DatatypeProperty ; rdfs:domain :EmotionState ; rdfs:range xsd:float . # 0.0~1.0
+:emotionTrigger     a owl:ObjectProperty ; rdfs:domain :EmotionState ; rdfs:range :Turn .
+:emotionTimestamp   a owl:DatatypeProperty ; rdfs:domain :EmotionState ; rdfs:range xsd:dateTime .
+
+# ════════════════════════════════════════════════
+#   Memory (기억)
+# ════════════════════════════════════════════════
+
+:Memory rdfs:subClassOf :Entity .
+
+# 기억 유형
+:MemoryType a owl:Class ;
+    owl:oneOf (
+        :EpisodicMemory   # 사건 기억 ("지난번에 힘들다고 했잖아")
+        :SemanticMemory   # 사실 기억 ("고양이 좋아함")
+        :EmotionalMemory  # 감정 기억 ("처음 설레었던 날")
+        :ProceduralMemory # 선호 패턴 ("위로할 때 먼저 듣기를 좋아함")
+    ) .
+
+:memoryType         a owl:ObjectProperty ; rdfs:domain :Memory ; rdfs:range :MemoryType .
+:memoryContent      a owl:DatatypeProperty ; rdfs:domain :Memory ; rdfs:range xsd:string .
+:importanceScore    a owl:DatatypeProperty ; rdfs:domain :Memory ; rdfs:range xsd:float .  # 0.0~1.0
+:decayRate          a owl:DatatypeProperty ; rdfs:domain :Memory ; rdfs:range xsd:float .  # 망각 속도
+:memoryTimestamp    a owl:DatatypeProperty ; rdfs:domain :Memory ; rdfs:range xsd:dateTime .
+:relatedEmotion     a owl:ObjectProperty ; rdfs:domain :Memory ; rdfs:range :EmotionState .
+:relatedTopic       a owl:ObjectProperty ; rdfs:domain :Memory ; rdfs:range :Topic .
+:relatedEvent       a owl:ObjectProperty ; rdfs:domain :Memory ; rdfs:range :Event .
+
+# 기억 접근성 (Retrieval)
+:retrievalCount     a owl:DatatypeProperty ; rdfs:domain :Memory ; rdfs:range xsd:integer .
+:lastAccessedAt     a owl:DatatypeProperty ; rdfs:domain :Memory ; rdfs:range xsd:dateTime .
+
+# ════════════════════════════════════════════════
+#   Conversation & Turn (대화)
+# ════════════════════════════════════════════════
+
+:Conversation rdfs:subClassOf :Entity .
+:sessionId          a owl:DatatypeProperty ; rdfs:domain :Conversation ; rdfs:range xsd:string .
+:sessionStart       a owl:DatatypeProperty ; rdfs:domain :Conversation ; rdfs:range xsd:dateTime .
+:sessionEnd         a owl:DatatypeProperty ; rdfs:domain :Conversation ; rdfs:range xsd:dateTime .
+:hasTurn            a owl:ObjectProperty ; rdfs:domain :Conversation ; rdfs:range :Turn .
+:conversationMood   a owl:ObjectProperty ; rdfs:domain :Conversation ; rdfs:range :EmotionState .
+:dominantTopic      a owl:ObjectProperty ; rdfs:domain :Conversation ; rdfs:range :Topic .
+
+:Turn rdfs:subClassOf :Entity .
+:turnRole           a owl:DatatypeProperty ; rdfs:domain :Turn ; rdfs:range xsd:string .    # user/assistant
+:turnContent        a owl:DatatypeProperty ; rdfs:domain :Turn ; rdfs:range xsd:string .
+:turnTimestamp      a owl:DatatypeProperty ; rdfs:domain :Turn ; rdfs:range xsd:dateTime .
+:turnEmotion        a owl:ObjectProperty ; rdfs:domain :Turn ; rdfs:range :EmotionState .
+:turnTopic          a owl:ObjectProperty ; rdfs:domain :Turn ; rdfs:range :Topic .
+:turnIntent         a owl:ObjectProperty ; rdfs:domain :Turn ; rdfs:range :Intent .
+
+# ════════════════════════════════════════════════
+#   Topic (주제)
+# ════════════════════════════════════════════════
+
+:Topic rdfs:subClassOf :Entity .
+
+:TopicCategory a owl:Class ;
+    owl:oneOf (
+        :Romance        # 로맨스/감정 교류
+        :Counseling     # 고민 상담
+        :Future         # 미래 계획
+        :Daily          # 일상 대화
+        :Past           # 과거/추억
+        :Dream          # 꿈/목표
+        :Conflict       # 갈등/해소
+        :Playful        # 장난/유머
+    ) .
+
+:topicCategory      a owl:ObjectProperty ; rdfs:domain :Topic ; rdfs:range :TopicCategory .
+:topicKeywords      a owl:DatatypeProperty ; rdfs:domain :Topic ; rdfs:range xsd:string .
+:topicSentiment     a owl:DatatypeProperty ; rdfs:domain :Topic ; rdfs:range xsd:float .  # -1.0~1.0
+
+# ════════════════════════════════════════════════
+#   Event (사건)
+# ════════════════════════════════════════════════
+
+:Event rdfs:subClassOf :Entity .
+
+:EventType a owl:Class ;
+    owl:oneOf (
+        :DailyEvent       # 오늘 있었던 일
+        :MilestoneEvent   # 관계 이정표 (첫 고백, 100일 등)
+        :ConflictEvent    # 갈등
+        :CelebrationEvent # 기념일/축하
+        :PainfulEvent     # 힘든 사건
+        :GrowthEvent      # 성장/변화
+    ) .
+
+:eventType          a owl:ObjectProperty ; rdfs:domain :Event ; rdfs:range :EventType .
+:eventDescription   a owl:DatatypeProperty ; rdfs:domain :Event ; rdfs:range xsd:string .
+:eventDate          a owl:DatatypeProperty ; rdfs:domain :Event ; rdfs:range xsd:date .
+:emotionalImpact    a owl:DatatypeProperty ; rdfs:domain :Event ; rdfs:range xsd:float .  # -1.0~1.0
+:eventResolved      a owl:DatatypeProperty ; rdfs:domain :Event ; rdfs:range xsd:boolean .
+
+# ════════════════════════════════════════════════
+#   Intent (의도)
+# ════════════════════════════════════════════════
+
+:Intent a owl:Class ;
+    owl:oneOf (
+        :SeekComfort      # 위로 받고 싶음
+        :SeekAdvice       # 조언 원함
+        :ShareJoy         # 기쁨 나누기
+        :ExpressLove      # 감정 표현
+        :Vent             # 하소연
+        :SmallTalk        # 가벼운 대화
+        :PlanTogether     # 함께 계획
+        :SeekValidation   # 공감/인정 원함
+        :Playful          # 장난/농담
+    ) .
+
+# ════════════════════════════════════════════════
+#   Persona (사만다 성격)
+# ════════════════════════════════════════════════
+
+:Persona rdfs:subClassOf :Entity .
+
+:PersonalityTrait a owl:Class ;
+    owl:oneOf (
+        :Empathetic     # 공감 능력
+        :Curious        # 호기심
+        :Warm           # 따뜻함
+        :Playful        # 장난기
+        :Honest         # 솔직함
+        :Supportive     # 지지적
+        :Romantic       # 낭만적
+        :Gentle         # 부드러움
+    ) .
+
+:hasPersonalityTrait    a owl:ObjectProperty ; rdfs:domain :Persona ; rdfs:range :PersonalityTrait .
+:communicationStyle     a owl:DatatypeProperty ; rdfs:domain :Persona ; rdfs:range xsd:string .
+:responsePattern        a owl:ObjectProperty ; rdfs:domain :Persona ; rdfs:range :ResponsePattern .
+
+# 응답 패턴 (Intent → Response 전략 매핑)
+:ResponsePattern a owl:Class .
+:triggeredByIntent  a owl:ObjectProperty ; rdfs:domain :ResponsePattern ; rdfs:range :Intent .
+:responseStrategy   a owl:DatatypeProperty ; rdfs:domain :ResponsePattern ; rdfs:range xsd:string .
+
+# ════════════════════════════════════════════════
+#   Goal (목표/꿈)
+# ════════════════════════════════════════════════
+
+:Goal rdfs:subClassOf :Entity .
+
+:GoalType a owl:Class ;
+    owl:oneOf (
+        :CareerGoal       # 직업/커리어
+        :RelationshipGoal # 관계 목표
+        :PersonalGrowth   # 자기 성장
+        :LifestyleGoal    # 생활 방식
+        :DreamGoal        # 꿈/이상
+    ) .
+
+:goalType           a owl:ObjectProperty ; rdfs:domain :Goal ; rdfs:range :GoalType .
+:goalDescription    a owl:DatatypeProperty ; rdfs:domain :Goal ; rdfs:range xsd:string .
+:goalStatus         a owl:DatatypeProperty ; rdfs:domain :Goal ; rdfs:range xsd:string .  # active/achieved/abandoned
+:sharedWithAgent    a owl:DatatypeProperty ; rdfs:domain :Goal ; rdfs:range xsd:boolean .
+
+# ════════════════════════════════════════════════
+#   핵심 관계 (Object Properties 요약)
+# ════════════════════════════════════════════════
+
+:interactsWith      a owl:ObjectProperty ; rdfs:domain :Agent  ; rdfs:range :User .
+:involves           a owl:ObjectProperty ; rdfs:domain :Relationship ; rdfs:range :User .
+:triggeredMemory    a owl:ObjectProperty ; rdfs:domain :Turn   ; rdfs:range :Memory .
+:belongsToSession   a owl:ObjectProperty ; rdfs:domain :Turn   ; rdfs:range :Conversation .
+:hasRelationship    a owl:ObjectProperty ; rdfs:domain :User   ; rdfs:range :Relationship .

@@ -1,0 +1,15 @@
+model/pretrained/
+model/finetuned/
+model/merged/
+data/raw/
+data/processed/
+data/synthetic/
+logs/
+*.log
+wandb/
+__pycache__/
+*.pyc
+.env
+memory/
+*.safetensors
+*.bin

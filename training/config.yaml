@@ -1,0 +1,52 @@
+# QLoRA 학습 설정
+# RunPod RTX 4090 (24GB) 기준
+
+model:
+  name: "Qwen/Qwen2.5-7B-Instruct"   # 한국어 우수
+  # name: "meta-llama/Llama-3.1-8B-Instruct"  # 대안
+
+data:
+  train: "./data/processed/train.jsonl"
+  val: "./data/processed/val.jsonl"
+  max_seq_length: 2048
+
+lora:
+  r: 64
+  alpha: 128
+  dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+quantization:
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_use_double_quant: true
+
+training:
+  output_dir: "./output/samantha-v1"
+  num_train_epochs: 3
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4   # 유효 배치: 16
+  learning_rate: 2.0e-4
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.05
+  weight_decay: 0.01
+  bf16: true
+  logging_steps: 10
+  eval_steps: 100
+  save_steps: 200
+  save_total_limit: 3
+  load_best_model_at_end: true
+  report_to: "wandb"               # wandb 사용 시 / 없으면 "none"
+
+generation:
+  max_new_tokens: 256
+  temperature: 0.85
+  top_p: 0.9
+  repetition_penalty: 1.1
